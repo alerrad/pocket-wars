@@ -1,4 +1,4 @@
-import sqlalchemy
+import sqlalchemy as db
 
 
 class DB_handler():

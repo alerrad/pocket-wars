@@ -13,7 +13,6 @@ Bot's functionality depends on codewars API, so just use specified commands belo
 ### Commands
 
 - `/warrior :username` - get personal info of @username
-- `/completed :username` - get list of completed katas of @username
 - `/badge :username` - get rank badge of @username
 - `/random_kata` - get any random kata (**INACCESSIBLE** cw API doesn't have this route yet)
 

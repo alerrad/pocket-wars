@@ -2,7 +2,7 @@ import typing
 import requests
 
 
-class APIHandler:
+class API_handler:
     @staticmethod
     def get_warrior(username: str) -> typing.Dict:
         pass
@@ -18,4 +18,5 @@ class APIHandler:
     @staticmethod
     def get_random() -> typing.Dict:
         ## INACCESSIBLE until the api gets updated
+        # Maybe come up with something for this route: https://www.codewars.com/api/v1/code-challenges/{challenge}
         pass
