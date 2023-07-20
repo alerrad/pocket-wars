@@ -19,7 +19,7 @@ async def cancel_handler(msg: tgTypes.Message, state: FSMContext):
     await msg.reply("Cancelled.")
     await state.finish()
 
-@dp.message_handler(commands=["start"])
+@dp.message_handler(ChatTypeFilter(tgTypes.ChatType.all()), commands=["start"])
 async def start(msg: tgTypes.Message):
     name = msg.from_user.first_name
 
@@ -30,15 +30,33 @@ async def start(msg: tgTypes.Message):
 
 ## Personal commands
 
-@dp.message_handler(commands=["warrior"])
+@dp.message_handler(ChatTypeFilter(tgTypes.ChatType.all()), commands=["warrior"])
 async def get_warrior(msg: tgTypes.Message):
-    pass
+    if len(msg.text.split()) != 2:
+        await bot.send_message(
+            msg.chat.id,
+            "please, use following syntax /warrior @username"
+        )
+    else:
+        ## TODO: check for null & format success data
+        warrior = API_handler.get_warrior(msg.text.split()[1])
+        await bot.send_message(
+            msg.chat.id,
+            f"Stats of the following user: {warrior}"
+        )
 
-@dp.message_handler(commands=["completed"])
+@dp.message_handler(ChatTypeFilter(tgTypes.ChatType.all()), commands=["completed"])
 async def get_completed(msg: tgTypes.Message):
-    pass
+    if len(msg.text.split()) != 2:
+        await bot.send_message(
+            msg.chat.id,
+            f"Please, use following format /completed @username"
+        )
+    else:
+        completed = API_handler.get_completed()
+        ## TODO check for null & format success data
 
-@dp.message_handler(commands=["badge"])
+@dp.message_handler(ChatTypeFilter(tgTypes.ChatType.all()), commands=["badge"])
 async def get_badge(msg: tgTypes.Message):
     username = msg.text.split()[1]
     badgeURL = API_handler.get_badge(username)
@@ -48,31 +66,25 @@ async def get_badge(msg: tgTypes.Message):
         badgeURL
     )
 
-@dp.message_handler(commands=["random_kata"])
+@dp.message_handler(ChatTypeFilter(tgTypes.ChatType.PRIVATE), commands=["random_kata"])
 async def random_kata(msg: tgTypes.Message):
     await bot.send_message('Command "random_kata" is currently inaccessible because of API v1.\nTry later')
 
 
 ## Group chat commands
 
-@dp.message_handler(commands=["leaderboard"])
+@dp.message_handler(ChatTypeFilter(tgTypes.ChatType.GROUP), commands=["leaderboard"])
 async def leaderboard(msg: tgTypes.Message):
-    if msg.chat.type == tgTypes.ChatType.PRIVATE:
-        await msg.reply("Must be a group chat to view the leaderboard!")
-    else:
-        group_id = msg.chat.id
-        ## 1) get all the registered users where groupId = group_id using DB_handler
-        ## 2) send leaderboard message if at least 1 user exists, otherwise "No registered users"
+    group_id = msg.chat.id
+    ## 1) get all the registered users where groupId = group_id using DB_handler
+    ## 2) send leaderboard message if at least 1 user exists, otherwise "No registered users"
 
-@dp.message_handler(commands=["regme"])
+@dp.message_handler(ChatTypeFilter(tgTypes.ChatType.GROUP), commands=["regme"])
 async def regme(msg: tgTypes.Message):
-    if msg.chat.type == tgTypes.ChatType.PRIVATE:
-        await msg.reply("Must be a group chat to register!")
-    else:
-        await UserData.username.set()
-        await msg.reply("Enter your codewars username")
+    await UserData.username.set()
+    await msg.reply("Enter your codewars username")
 
-@dp.message_handler(state=UserData.username)
+@dp.message_handler(ChatTypeFilter(tgTypes.ChatType.GROUP), state=UserData.username)
 async def process_username(msg: tgTypes.Message, state: FSMContext):
     async with state.proxy() as data:
         data["name"] = msg.text
@@ -82,15 +94,12 @@ async def process_username(msg: tgTypes.Message, state: FSMContext):
     await msg.reply(res)
     await state.finish()
 
-@dp.message_handler(commands=["unregme"])
+@dp.message_handler(ChatTypeFilter(tgTypes.ChatType.GROUP), commands=["unregme"])
 async def unregme(msg: tgTypes.Message):
-    if msg.chat.type == tgTypes.ChatType.PRIVATE:
-        await msg.reply("Must be a group chat to unreg!")
-    else:
-        group_id = msg.chat.id
-        user_id = msg.from_user.id
-        ## 1) unreg user where groupId = group_id and userId = user_id using DB_handler
-        ## 2) send "success" message on success, "no user found" on failure
+    group_id = msg.chat.id
+    user_id = msg.from_user.id
+    ## 1) unreg user where groupId = group_id and userId = user_id using DB_handler
+    ## 2) send "success" message on success, "no user found" on failure
 
 
 ## Entry point

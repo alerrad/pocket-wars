@@ -5,11 +5,13 @@ import requests
 class API_handler:
     @staticmethod
     def get_warrior(username: str) -> typing.Dict:
-        pass
-    
-    @staticmethod
-    def get_completed(username: str) -> list[typing.Dict]:
-        pass
+        warrior = requests.get(f"https://codewars.com/api/v1/user/{username}").json()
+        return {
+            "name": warrior.name,
+            "honor": warrior.honor,
+            "rank": warrior.ranks.overall.name,
+            "completed": warrior.codeChallenges.totalCompleted
+        }
     
     @staticmethod
     def get_badge(username: str) -> str:
